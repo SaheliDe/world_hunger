@@ -18,6 +18,31 @@
             border: 1px solid #ccc;
             margin-top: 10px;
             padding: 10px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        #spinner {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            position: absolute;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -27,6 +52,7 @@
     <div id="map"></div>
     <button id="clear-all">Clear All</button>
     <div id="log"></div>
+    <div id="spinner"></div>
     <script>
         var map = L.map('map').setView([9.0820, 8.6753], 6);
 
@@ -53,13 +79,27 @@
         });
         map.addControl(drawControl);
 
-        function logMessage(message) {
+        function logMessage(message, success = false) {
             var log = document.getElementById('log');
             var messageElement = document.createElement('p');
             messageElement.textContent = message;
+            if (success) {
+                messageElement.style.color = 'green';
+            }
             log.appendChild(messageElement);
             log.scrollTop = log.scrollHeight;  // Scroll to the bottom
         }
+
+        function showSpinner(show) {
+            var spinner = document.getElementById('spinner');
+            spinner.style.display = show ? 'block' : 'none';
+        }
+
+        document.addEventListener('mousemove', function (e) {
+            var spinner = document.getElementById('spinner');
+            spinner.style.left = e.pageX + 'px';
+            spinner.style.top = e.pageY + 'px';
+        });
 
         map.on('draw:created', function (e) {
             var layer = e.layer;
@@ -71,6 +111,8 @@
 
             logMessage("Selected coordinates: " + coord1 + ", " + coord2);
             logMessage("Starting process, please wait...")
+
+            showSpinner(true);
 
             fetch('/process', {
                 method: 'POST',
@@ -104,14 +146,13 @@
                         });
                         markers.addLayer(marker);
                     });
-                })
-                .then(data => {
-                    logMessage("Done!");
-                    return data;
+                    logMessage("Done!", true);
+                    showSpinner(false);
                 })
                 .catch(error => {
                     logMessage("Error: " + error);
                     console.error('Error:', error);
+                    showSpinner(false);
                 });
         });
 

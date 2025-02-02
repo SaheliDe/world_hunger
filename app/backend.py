@@ -49,7 +49,7 @@ def process():
     coord2 = data["coord2"]
     print(f"Received coordinates: {coord1}, {coord2}")  # Debugging line
 
-    file_path = "nga_general_2020.csv"  # Replace with the actual file path
+    file_path = "app/nga_general_2020.csv"  # Replace with the actual file path
     lon_min = min(coord1["lng"], coord2["lng"])
     lon_max = max(coord1["lng"], coord2["lng"])
     lat_min = min(coord1["lat"], coord2["lat"])
